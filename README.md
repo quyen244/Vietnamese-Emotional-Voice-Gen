@@ -121,11 +121,41 @@ Hiện nay, các hệ thống TTS tiếng Việt phổ biến thường gặp v�
 
 Hệ thống được huấn luyện qua quy trình xử lý dữ liệu nghiêm ngặt:
 
-1.  **Crawl:** Thu thập Audio từ các kênh Podcast/Truyện ma uy tín (1 speaker).
-2.  **Vocal Separation:** Sử dụng **UVR5 (MDX-Net)** để loại bỏ nhạc nền và tiếng vang.
-3.  **Segmentation:** Cắt audio thành các đoạn ngắn 3s-10s dựa trên khoảng lặng.
-4.  **Transcription:** Dùng **Faster-Whisper (Large-v3)** để chuyển audio thành text chính xác 99%.
-5.  **Labeling:** Gán nhãn cảm xúc thủ công để tăng cường độ chính xác khi inference.
+
+1.  **Crawl (Dữ liệu thô):**
+    * **Đầu vào:** URL YouTube/Podcast.
+    * **Công cụ:** `yt-dlp`.
+    * **Đầu ra:** Các file âm thanh thô (thường là định dạng `.webm` hoặc `.m4a`).
+
+2.  **Convert (Chuẩn hóa định dạng):**
+    * **Đầu vào:** File `.webm`/`.m4a` thô.
+    * **Công cụ:** `FFmpeg` (chạy qua script Python).
+    * **Đầu ra:** File `.wav` chuẩn (ví dụ: 16bit, 44.1kHz hoặc 32kHz, Mono). Bước này đảm bảo tính tương thích cho các công cụ sau.
+
+3.  **Vocal Separation (Tách lời - Cực quan trọng):**
+    * **Đầu vào:** File `.wav` đã chuẩn hóa.
+    * **Công cụ:** `UVR5` (Ultimate Vocal Remover) hoặc thư viện `audio-separator`.
+    * **Quy trình:**
+        * *Lần 1 (Model MDX-Net):* Tách Vocal (giọng) và Instrumental (nhạc nền).
+        * *Lần 2 (Model DeEcho-DeReverb - Nếu cần):* Khử tiếng vang để lấy giọng "khô" (Dry Vocal) nhất.
+    * **Đầu ra:** File `.wav` chỉ chứa giọng nói sạch, không nhạc, không vang.
+
+4.  **Slicing (Cắt nhỏ):**
+    * **Đầu vào:** File Vocal sạch (thường dài vài phút đến vài chục phút).
+    * **Công cụ:** `Audio Slicer` (ví dụ: `pydub`, `librosa`).
+    * **Cách làm:** Tự động phát hiện khoảng lặng (silence) để cắt thành các đoạn ngắn từ 3 đến 10 giây mà không làm mất chữ.
+    * **Đầu ra:** Thư mục chứa hàng trăm/hàng nghìn file `.wav` ngắn (3-10s).
+
+5.  **Transcription (Chuyển thành văn bản):**
+    * **Đầu vào:** Thư mục chứa các đoạn `.wav` ngắn.
+    * **Công cụ:** `Faster-Whisper` (Model `large-v3` cho tiếng Việt).
+    * **Đầu ra:** Văn bản (Text) tương ứng cho từng đoạn âm thanh.
+
+6.  **Gán nhãn & Tạo List (Tạo Metadata):**
+    * **Đầu vào:** File audio ngắn + Văn bản tương ứng.
+    * **Công cụ:** Script Python tự động + Gán nhãn cảm xúc thủ công (ví dụ: `[Vui]`, `[Buồn]`).
+    * **Đầu ra:** File `list.txt` cuối cùng theo định dạng yêu cầu của GPT-SoVITS: `đường_dẫn_file|tên_speaker|ngôn_ngữ|văn_bản_có_tag`.
+
 
 -----
 
