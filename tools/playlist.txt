@@ -1,0 +1,36 @@
+{
+    "topics": {
+        "knowledge": {
+            "authors": [
+                {
+                    "name": "Vui Vẻ",
+                    "urls": [
+                        "https://www.youtube.com/watch?v=en6RQgjAEmM",
+                        "https://www.youtube.com/watch?v=X5YqZh4ysyY",
+                        "https://www.youtube.com/watch?v=99LXQSYzH-8"
+                    ]
+                },
+                {
+                    "name": "Spiderum",
+                    "urls": [
+                        "https://www.youtube.com/watch?v=fc8xseBKtiQ"
+                    ]
+                }
+            ]
+        },
+        "philosophy": {
+            "authors": [
+                {
+                    "name": "Duy Thanh Nguyen",
+                    "urls": [
+                        "https://www.youtube.com/watch?v=_9TO4Vog26I",
+                        "https://www.youtube.com/watch?v=O-fBnUWDORc"
+                    ]
+                }
+            ]
+        },
+        "self-development": {
+            "authors": []
+        }
+    }
+}
