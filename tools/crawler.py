@@ -5,6 +5,10 @@ from utils.read_txtfile import get_data_fromtxt
 import argparse
 import os 
 
+# install and extract than assign path 
+os.environ["PATH"] += r";C:\ffmpeg\ffmpeg-8.1-essentials_build\bin"
+
+
 class YoutubeCrawler:
     def __init__(self, root_dir: str):
         """

@@ -10,9 +10,9 @@
 
 > **Vn-EmoVoice** là một hệ thống chuyển đổi văn bản thành giọng nói (Text-to-Speech) chuyên sâu cho tiếng Việt, tập trung vào khả năng tái tạo cảm xúc và sắc thái biểu cảm tự nhiên. Thay vì giọng đọc robot đơn điệu, hệ thống sử dụng công nghệ Fine-tuning trên mô hình **GPT-SoVITS** với tập dữ liệu đặc thù từ Podcast và Truyện ma, giúp tạo ra các nội dung lồng tiếng có hồn, phục vụ cho sáng tạo nội dung số, audiobook và trợ lý ảo thông minh.
 
-\<p align="center"\>
-\<img src="[https://raw.githubusercontent.com/RVC-Boss/GPT-SoVITS/main/docs/en/img/inference\_webui.png](https://www.google.com/search?q=https://raw.githubusercontent.com/RVC-Boss/GPT-SoVITS/main/docs/en/img/inference_webui.png)" width="600" alt="VEV System Preview"\>
-\</p\>
+<p align="center">
+<img src="thumbnail.png" width="600" alt="VEV System Preview">
+</p>
 
 **Technical Highlights:**
 
