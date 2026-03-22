@@ -6,7 +6,6 @@
 </p>
 
 <h1 align="center"><b>Vn-EmoVoice: Emotional Vietnamese TTS System</b></h1>
-# **Personal Project: Vn-EmoVoice (VEV)**
 
 > **Vn-EmoVoice** là một hệ thống chuyển đổi văn bản thành giọng nói (Text-to-Speech) chuyên sâu cho tiếng Việt, tập trung vào khả năng tái tạo cảm xúc và sắc thái biểu cảm tự nhiên. Thay vì giọng đọc robot đơn điệu, hệ thống sử dụng công nghệ Fine-tuning trên mô hình **GPT-SoVITS** với tập dữ liệu đặc thù từ Podcast và Truyện ma, giúp tạo ra các nội dung lồng tiếng có hồn, phục vụ cho sáng tạo nội dung số, audiobook và trợ lý ảo thông minh.
 
