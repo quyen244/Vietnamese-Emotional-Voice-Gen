@@ -1,0 +1,53 @@
+# --- Core Deep Learning Framework ---
+torch>=2.1.0
+torchvision
+torchaudio
+tensorboard
+
+# --- Audio Processing & Manipulation ---
+librosa==0.9.2
+scipy
+soundfile
+pyworld
+ffmpeg-python
+noisereduce
+pydub
+
+# --- GPT-SoVITS Model Dependencies ---
+transformers==4.37.2
+accelerate
+sentencepiece
+einops
+local_attention
+jieba
+cn2an
+pypinyin
+langdetect
+
+# --- Vietnamese NLP Support ---
+pyvi
+vntk
+
+# --- Speech-to-Text (Whisper) ---
+faster-whisper
+openai-whisper
+
+# --- Vocal Separation (UVR5) ---
+onnxruntime-gpu
+ml-collections
+resampy
+
+# --- Interface & API ---
+gradio==4.19.0
+fastapi
+uvicorn
+python-dotenv
+requests
+tqdm
+
+# --- Utilities ---
+numpy<2.0.0
+pandas
+matplotlib
+pyyaml
+psutil
