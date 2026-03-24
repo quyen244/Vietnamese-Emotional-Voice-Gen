@@ -24,37 +24,56 @@ class AudioProductionPipeline:
         )
 
     def separate_vocals(self, input_path):
-        """
-        Bước 2.2: Tách lời và khử vang (2 giai đoạn)
-        """
         input_path = Path(input_path)
         final_vocal_dir = self.output_root / "clean_vocals"
         final_vocal_dir.mkdir(parents=True, exist_ok=True)
-        
+        tmp_dir = self.output_root / "tmp"
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+
+        # Biến tạm để lưu đường dẫn file tốt nhất hiện có
+        current_best_vocal = None
+
         try:
-            # Giai đoạn 1: Tách nhạc nền (MDX-Net)
-            logger.info(f"Stage 1: Separating Vocals/BGM for {input_path.name}")
+            # --- Giai đoạn 1: Tách nhạc nền (BẮT BUỘC) ---
+            logger.info(f"--- Stage 1: Separating Vocals for {input_path.name} ---")
             self.separator.load_model("UVR-MDX-NET-Voc_FT.onnx")
             output_files = self.separator.separate(str(input_path))
-            vocal_file_path = [f for f in output_files if "Vocals" in f][0]
-            vocal_full_path = self.output_root / "tmp" / vocal_file_path
+            
+            vocal_file_name = next((f for f in output_files if "Vocals" in f), None)
+            if not vocal_file_name:
+                logger.error("Không tách được lời ở Stage 1.")
+                return None
+            
+            current_best_vocal = tmp_dir / vocal_file_name
+            logger.info(f"Stage 1 thành công: {vocal_file_name}")
 
-            # Giai đoạn 2: Khử vang (DeEcho-DeReverb)
-            logger.info(f"Stage 2: De-reverberating {vocal_file_path}")
-            self.separator.load_model("UVR-DeEcho-DeReverb.onnx")
-            dry_vocal_files = self.separator.separate(str(vocal_full_path))
-            dry_vocal_name = [f for f in dry_vocal_files if "No Echo" in f or "Vocals" in f][0]
+            # --- Giai đoạn 2: Khử vang (TÙY CHỌN - Nếu lỗi vẫn chạy tiếp) ---
+            try:
+                logger.info(f"--- Stage 2: De-reverberating {vocal_file_name} ---")
+
+                self.separator.load_model("UVR-De-Echo-Normal.onnx") 
+                dry_vocal_files = self.separator.separate(str(current_best_vocal))
+                
+                if dry_vocal_files:
+                    current_best_vocal = tmp_dir / dry_vocal_files[0]
+                    logger.info("Stage 2 (Khử vang) thành công.")
+            except Exception as e_stage2:
+                logger.warning(f"Stage 2 lỗi (có thể do thiếu model): {e_stage2}. Sẽ dùng kết quả Stage 1 để Slice.")
+
+            # --- Di chuyển file cuối cùng ra thư mục chính thức ---
+            import shutil
+            final_path = final_vocal_dir / f"{input_path.stem}_clean.wav"
             
-            # Di chuyển file cuối cùng ra thư mục chính thức
-            final_path = final_vocal_dir / f"{input_path.stem}_dry.wav"
-            os.replace(self.output_root / "tmp" / dry_vocal_name, final_path)
-            
-            logger.info(f"Vocal separation completed: {final_path}")
-            return final_path
+            if current_best_vocal and current_best_vocal.exists():
+                shutil.move(str(current_best_vocal), str(final_path))
+                logger.info(f"SUCCESS: File sạch đã sẵn sàng tại {final_path}")
+                return final_path
+            else:
+                return None
+
         except Exception as e:
-            logger.error(f"Error in vocal separation for {input_path}: {e}")
+            logger.error(f"Lỗi nghiêm trọng tại {input_path.name}: {str(e)}")
             return None
-
     def slice_audio(self, vocal_path, min_duration=3000, max_duration=10000):
         """
         Bước 2.3: Cắt nhỏ audio dựa trên khoảng lặng (Silence Detection)
@@ -63,10 +82,12 @@ class AudioProductionPipeline:
         if not vocal_path: return
         
         vocal_path = Path(vocal_path)
-        chunk_dir = self.output_root / "chunks" / vocal_path.stem
+        
+        short_name = f"{vocal_path.stem[:15]}_{vocal_path.stem[-5:]}"
+        chunk_dir = self.output_root / "chunks" / short_name
         chunk_dir.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"Slicing audio: {vocal_path.name}")
+        logger.info(f"Slicing audio: {vocal_path.name} -> Saving to: {short_name}")
         audio = AudioSegment.from_wav(vocal_path)
         
         # Tự động cắt theo khoảng lặng
@@ -82,18 +103,16 @@ class AudioProductionPipeline:
         count = 0
         for i, chunk in enumerate(chunks):
             duration = len(chunk)
-            # Chỉ giữ các đoạn từ 3s đến 10s
             if min_duration <= duration <= max_duration:
-                chunk_name = f"{vocal_path.stem}_chunk_{count:03d}.wav"
+                chunk_name = f"c_{count:04d}.wav" 
                 chunk.export(chunk_dir / chunk_name, format="wav")
                 count += 1
             
-            # Nếu đoạn quá dài, ta có thể cắt cưỡng bức (optional)
             elif duration > max_duration:
                 for j in range(0, duration, max_duration):
                     sub_chunk = chunk[j:j+max_duration]
                     if len(sub_chunk) >= min_duration:
-                        chunk_name = f"{vocal_path.stem}_chunk_{count:03d}.wav"
+                        chunk_name = f"c_{count:04d}.wav"
                         sub_chunk.export(chunk_dir / chunk_name, format="wav")
                         count += 1
 
@@ -124,6 +143,8 @@ if __name__ == "__main__":
 
         for file in tqdm(files, desc="Processing Audio"):
             clean_vocal = pipeline.separate_vocals(file)
+
+            print(f'Path of clean_vocal : {clean_vocal}')
             
             if clean_vocal:
                 pipeline.slice_audio(clean_vocal)
