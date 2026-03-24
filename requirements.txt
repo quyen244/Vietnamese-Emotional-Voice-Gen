@@ -55,3 +55,8 @@ psutil
 # 
 
 yt-dlp
+audio-separator[gpu] 
+pydub 
+librosa 
+tqdm
+soundfile
