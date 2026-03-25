@@ -4,13 +4,12 @@ from pathlib import Path
 from faster_whisper import WhisperModel
 from tqdm import tqdm
 import torch
-
-# Sử dụng logger đã setup của bạn
+import argparse
 from utils.logger import _setup_logging
 logger = _setup_logging(outputPath='transcription.log', purpose='Speech-to-Text')
 
 class TranscriptionPipeline:
-    def __init__(self, model_size="large-v3", device="cuda"):
+    def __init__(self, model_size="small", device="cuda"):
         """
         Khởi tạo Whisper Model. 
         Sử dụng float16 trên GPU để tối ưu tốc độ và bộ nhớ.
@@ -31,7 +30,7 @@ class TranscriptionPipeline:
         Format: path|speaker|language|text
         """
         chunks_root = Path(chunks_root)
-        all_wavs = list(chunks_root.rglob("*.wav")) # Quét tất cả folder con
+        all_wavs = list(chunks_root.rglob("*.wav"))
         
         if not all_wavs:
             logger.warning(f"No wav files found in {chunks_root}")
@@ -39,7 +38,7 @@ class TranscriptionPipeline:
 
         logger.info(f"Found {len(all_wavs)} chunks. Starting transcription...")
         
-        with open(output_file, "w", encoding="utf-8") as f:
+        with open(output_file, "a", encoding="utf-8") as f:
             for wav_path in tqdm(all_wavs, desc="Transcribing"):
                 try:
                     # Chạy Transcription
@@ -67,11 +66,26 @@ class TranscriptionPipeline:
 
         logger.info(f"Transcription finished! Dataset list saved to: {output_file}")
 
+def get_args():
+    parser = argparse.ArgumentParser(description="Args for transcripter")
+    parser.add_argument("--mode" , default='one')
+    parser.add_argument("--file" , default='Unknown')
+    parser.add_argument("--speaker_name" , default='Unknown')
+
+    return parser.parse_args()
+
 # --- Cách tích hợp vào main của bạn ---
 if __name__ == "__main__":
-    # Đường dẫn thư mục chunks bạn vừa tạo ở bước trước
-    CHUNKS_DIR = "data/processed/chunks"
-    OUTPUT_LIST = "data/processed/list.txt"
+    args = get_args()
     
-    transcriber = TranscriptionPipeline(model_size="large-v3")
-    transcriber.run(CHUNKS_DIR, OUTPUT_LIST, speaker_name="Nikola_Tesla")
+    OUTPUT_LIST = "data/processed/list.txt"
+    transcriber = TranscriptionPipeline(model_size="medium")
+    
+    if args.mode == 'all':
+        CHUNKS_DIR = "data/processed/chunks"
+        transcriber.run(CHUNKS_DIR, OUTPUT_LIST, speaker_name=args.speaker_name)
+    else:
+        CHUNKS_DIR = args.file
+        transcriber.run(CHUNKS_DIR, OUTPUT_LIST, speaker_name=args.speaker_name)
+
+    # py -m tools.get_scripts --mode='one' --file='data\processed\chunks\T_t_c_cac_ki_u__clean' --speaker_name='Vui vẻ'
