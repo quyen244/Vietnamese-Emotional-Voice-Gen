@@ -18,7 +18,7 @@
   * **Core Architecture:** Sử dụng **GPT-SoVITS** (Few-shot Voice Conversion & TTS).
   * **Data Processing:** Pipeline tự động tách giọng (**UVR5**) và gán nhãn văn bản (**Faster-Whisper**).
   * **Fine-tuning:** Kỹ thuật **Transfer Learning** trên tập dataset tiếng Việt đa sắc thái (Vui, Buồn, Giận dữ, Kinh dị).
-  * **Audio Optimization:** Quy trình xử lý nhiễu và chuẩn hóa âm thanh studio-quality. fdfdf
+  * **Audio Optimization:** Quy trình xử lý nhiễu và chuẩn hóa âm thanh studio-quality. 
   * **Deployment:** Giao diện WebUI tương tác trực quan để tùy chỉnh độ dài, tốc độ và cảm xúc giọng đọc.
 
 -----
